@@ -15,8 +15,8 @@ Description:
     This script is used to install and uninstall Starry.
 
 Usage:
-    sudo python3 setup.py [install|uninstall|help]
-
+    (sudo) python setup.py [install|uninstall|help]
+    
     install - Compiles and moves Starry to your local binary directory.
     uninstall - Removes Starry from your local binary directory.
     help - Displays this help message.
@@ -34,10 +34,16 @@ def print_ok():
 def ask_perm(action: str):
     if action.lower() != "y" and action.lower() != "yes":
         exit(1)
-
-    if os.getuid() != 0:
-        print("You need to run this script as sudo.")
-        exit(1)
+    
+    try:
+        if os.getuid() != 0:
+            print("You need to run this script as sudo.")
+            exit(1)
+    except AttributeError:
+        import ctypes
+        if ctypes.windll.shell32.IsUserAnAdmin() == 0:
+            print("You need to run this script as admin.")
+            exit(1)
 
 
 def main():
@@ -52,7 +58,7 @@ def main():
 
     match sys.argv[1]:
         case "install":
-            ask_perm(input("Starry will be compiled and moved to /usr/local/bin, for this you need to run as sudo. Do you wish to continue? [Y/n] "))
+            ask_perm(input("Starry will be compiled and moved to /usr/local/bin for linux, for this you need to run as sudo. Do you wish to continue? [Y/n] "))
 
             print("Compiling Starry... ", end="", flush=True)
 
@@ -71,27 +77,60 @@ def main():
                 print(f"Compilation failed with the following error: {e}")
                 exit(1)
 
-            print("Moving Starry to /usr/local/bin... ", end="", flush=True)
+            print("Moving Starry to ", end="", flush=True)
             try:
-                match platform.machine():
-                    case "x86_64":
-                        shutil.move("Starry/bin/Release/net8.0/linux-x64/publish/Starry", "/usr/local/bin/starry")
-                    case "aarch64":
-                        shutil.move("Starry/bin/Release/net8.0/linux-arm64/publish/Starry", "/usr/local/bin/starry")
+                system: str = platform.system();
+                match system:
+                    case "Windows":
+                        path: str = "C:/Windows/system32"
+                        print(f"{path}... ", end="", flush=True)   
+                        match platform.machine():
+                            case "AMD64":
+                                shutil.move("Starry/bin/Release/net8.0/win-x64/publish/Starry.exe", f"{path}/starry.exe")
+                            case _:
+                                print_err()
+                                print(f"Unrecognised CPU arch: {platform.machine()}")
+                                
+                                exit(1)
+                    case "Linux":
+                        print("/usr/local/bin... ", end="", flush=True)
+                        match platform.machine():
+                            case "x86_64":
+                                shutil.move("Starry/bin/Release/net8.0/linux-x64/publish/Starry", "/usr/local/bin/starry")
+                            case "aarch64":
+                                shutil.move("Starry/bin/Release/net8.0/linux-arm64/publish/Starry", "/usr/local/bin/starry")
+                            case _:
+                                print_err()
+                                print(f"Unrecognised CPU arch: {platform.machine()}")
+                                
+                                exit(1)
+                    case _:
+                        print_err()
+                        print("Unrecognised operating system.")
+
+                        exit(1)
             except Exception as e:
                 print_err()
-
                 print(f"Moving failed with the following error: {e}")
+
                 exit(1)
 
             print_ok()
         case "uninstall":
-            ask_perm(input("Starry will be deleted from /usr/local/bin, for this you need to run as sudo. Do you wish to continue? [Y/n] "))
+            ask_perm(input("Starry will be deleted from binary path, for this you need to run as sudo. Do you wish to continue? [Y/n] "))
 
-            print("Removing Starry from /usr/local/bin... ", end="", flush=True)
+            print("Removing Starry from binary path... ", end="", flush=True)
 
             try:
+                if platform.system() == "Windows":
+                    os.remove("C:/Windows/system32/starry.exe")
+
+                    print_ok()
+
+                    return
+
                 os.remove("/usr/local/bin/starry")
+
                 print_ok()
             except Exception as e:
                 print_err()
@@ -102,6 +141,5 @@ def main():
             print(help_str)
 
 
-# Actual beginning of the setup.
 if __name__ == "__main__":
     main()
