@@ -1,0 +1,6 @@
+**/bin
+**/obj
+
+# Leaving .vscode because it's actually usefull.
+.vs
+.idea
