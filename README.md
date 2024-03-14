@@ -1,7 +1,7 @@
 # Starry
 
 Starry is a simple, cross-platform, backup tool written in C#.
-Starry is used to quickly and easily backup your files and directories, automatically compressing them at your will using it's configuration system.
+Starry is used to quickly and easily backup your files and directories, automatically compressing them at your will using its configuration system.
 
 ## Installation
 ### Pre-requisites
@@ -17,7 +17,7 @@ sudo dnf in dotnet-runtime-8.0 dotnet-sdk-8.0 python3
 sudo pacman -S dotnet-runtime dotnet-sdk python
 
 # Ubuntu based distributions
-sudo pacman -S dotnet-runtime-8.0 dotnet-sdk-8.0 python3
+sudo apt-get install dotnet-runtime-8.0 dotnet-sdk-8.0 python3
 ```
 #### For Windows
 Using choco
