@@ -1,6 +1,7 @@
 # Starry
 
 Starry is a simple, cross-platform, backup tool written in C#.
+Starry is used to quickly and easily backup your files and directories, automatically compressing them at your will using it's configuration system.
 
 ## Installation
 ### Pre-requisites
