@@ -18,7 +18,7 @@ Starry is configured through it's CLI, but, it uses JSON under the hood.
 By running `starry config --help` you'll get a pretty good idea of how configration is done.
 
 ```
-Copyright (C) 2024 Starry
+Copyright (C) 2024 Evelyn Serra
 
   -a, --add-path           Add a path to a folder or a file to backup.
 
