@@ -24,6 +24,12 @@ public static class StarConfig
         return configPath;
     }
 
+    public static void Update(ConfigModel config)
+    {
+        string configString = JsonSerializer.Serialize<ConfigModel>(config);
+        File.WriteAllText(Path.Combine(ConfigDir, "config.json"), configString);
+    }
+
     public static void EnsureExists()
     {
         string configPath = Path.Combine(ConfigDir, "config.json");
