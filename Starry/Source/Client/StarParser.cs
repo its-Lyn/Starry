@@ -26,6 +26,8 @@ public class StarParser
         [Option('r', "remove-path", Required = false, HelpText = "Remove a backup path from your config. Type all to remove all of the paths.")]
         public string? PathRemove { get; set; }
 
+        [Option('e', "remove-ignore", Required = false, HelpText = "Remove an ignore path from your config. Type all to remove all of the paths.")]
+        public string? PathIgnoreRemove { get; set; }
 
         [Option('l', "list-config", Required = false, HelpText = "Show all the paths in your config.")]
         public bool ShowConfig { get; set; }
@@ -125,7 +127,7 @@ public class StarParser
                     int ignoreCount = 0;
 
                     Console.WriteLine($"{Starry.Colour.ColourText("Ignore folders:", Colours.Cyan)}");
-                    if (conf.Paths.Count() == 0)
+                    if (conf.IgnorePaths.Count() == 0)
                     {
                         Console.WriteLine(Starry.Colour.ColourText("    No Ignored Folders added yet! Horray!\n", Colours.Green));
                     }
@@ -206,6 +208,30 @@ public class StarParser
                     if (!success)
                     {
                         Console.WriteLine("Failed to remove path. No such path in the config file.");
+                        return;
+                    }
+
+                    StarConfig.Update(conf);
+                }
+                
+                if (config.PathIgnoreRemove is not null)
+                {
+                    if (config.PathIgnoreRemove.ToLower() == "all")
+                    {
+                        conf.IgnorePaths.Clear();
+                        StarConfig.Update(conf);
+
+                        return;
+                    }
+
+                    Console.Write($"Removing {config.PathIgnoreRemove}... ");
+
+                    bool success = conf.IgnorePaths.Remove(config.PathIgnoreRemove);
+                    Console.WriteLine($"{(success ? Starry.Colour.ColourText("OK", Colours.Green) : Starry.Colour.ColourText("ERR", Colours.Red))}");
+
+                    if (!success)
+                    {
+                        Console.WriteLine("Failed to remove ignore path. No such path in the config file.");
                         return;
                     }
 
