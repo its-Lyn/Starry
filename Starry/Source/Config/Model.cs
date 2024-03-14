@@ -6,6 +6,9 @@ public class ConfigModel
 {
     [JsonPropertyName("paths")]
     public required List<string> Paths { get; set; }
+    
+    [JsonPropertyName("ignore_paths")]
+    public required List<string> IgnorePaths { get; set; }
 
     [JsonPropertyName("default_output")]
     public string? DefaultOut { get; set; }

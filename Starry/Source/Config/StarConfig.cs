@@ -34,10 +34,11 @@ public static class StarConfig
     {
         string configPath = Path.Combine(ConfigDir, "config.json");
         if (!File.Exists(configPath))
-        { 
+        {
             ConfigModel defaultConfig = new ConfigModel
             {
                 Paths = new List<string>(),
+                IgnorePaths = new List<string>(),
                 DefaultOut = null,
                 ZipDirs = false,
                 ZipParent = true,

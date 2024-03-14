@@ -20,6 +20,9 @@ public class StarParser
         [Option('a', "add-path", Required = false, HelpText = "Add a path to a folder or a file to backup.")]
         public string? Path { get; set; }
 
+        [Option('i', "ignore-path", Required = false, HelpText = "Ignore a specific path from being backed up.")]
+        public string? PathIgnore { get; set; }
+
         [Option('r', "remove-path", Required = false, HelpText = "Remove a backup path from your config. Type all to remove all of the paths.")]
         public string? PathRemove { get; set; }
 
@@ -79,6 +82,24 @@ public class StarParser
                     StarConfig.Update(conf);
                 }
 
+                if (config.PathIgnore is not null)
+                {
+                    if (!File.Exists(config.PathIgnore) && !Directory.Exists(config.PathIgnore))
+                    {
+                        Console.Write($"{Starry.Colour.ColourText("HALT!", Colours.Yellow)} \"{config.PathIgnore}\" does not exist. Do you wish to add it to your config anyway? [y/N] ");
+                        string action = Console.ReadLine()!;
+                        action = action.Trim().ToLower();
+
+                        if (action != "y" && action != "yes" && !string.IsNullOrEmpty(action))
+                        {
+                            return;
+                        }
+                    }
+
+                    conf.IgnorePaths.Add(config.PathIgnore);
+                    StarConfig.Update(conf);
+                }
+
                 if (config.ShowConfig)
                 {
                     conf = StarConfig.Fetch();
@@ -96,7 +117,25 @@ public class StarParser
                         foreach (string path in conf.Paths)
                         {
                             count++;
-                            Console.WriteLine($"    {Starry.Colour.ColourText($"[{count}]", Colours.Magenta)}    {Starry.Colour.ColourText($"\"{path}\"", Colours.Green)}");
+                            Console.WriteLine($"{Starry.Colour.ColourText($"[{count}]", Colours.Magenta)}    {Starry.Colour.ColourText($"\"{path}\"", Colours.Green)}");
+                        }
+                        Console.WriteLine();
+                    }
+
+                    int ignoreCount = 0;
+
+                    Console.WriteLine($"{Starry.Colour.ColourText("Ignore folders:", Colours.Cyan)}");
+                    if (conf.Paths.Count() == 0)
+                    {
+                        Console.WriteLine(Starry.Colour.ColourText("    No Ignored Folders added yet! Horray!\n", Colours.Green));
+                    }
+                    else
+                    {
+
+                        foreach (string path in conf.IgnorePaths)
+                        {
+                            ignoreCount++;
+                            Console.WriteLine($"{Starry.Colour.ColourText($"[{ignoreCount}]", Colours.Magenta)}    {Starry.Colour.ColourText($"\"{path}\"", Colours.Green)}");
                         }
                         Console.WriteLine();
                     }

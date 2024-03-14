@@ -6,8 +6,16 @@ namespace Starry.Source.Client;
 
 public static class Handlers
 {
+
+    private static readonly ConfigModel Config = StarConfig.Fetch();
+
     private static void CopyDir(string path, string output)
     {
+        if (Config.IgnorePaths.Contains(path))
+        {
+            return;
+        }
+
         // Start the process of copying over directory
         DirectoryInfo dir = new DirectoryInfo(path);
         if (!dir.Exists)
@@ -27,7 +35,14 @@ public static class Handlers
         Directory.CreateDirectory(dest);
 
         foreach (FileInfo file in files)
+        {
+            if (Config.IgnorePaths.Contains(file.FullName))
+            {
+                continue;
+            }
+
             file.CopyTo(Path.Combine(dest, file.Name));
+        }
 
         foreach (DirectoryInfo subDir in dirs)
             CopyDir(subDir.FullName, dest);
@@ -76,6 +91,12 @@ public static class Handlers
 
         foreach (string path in config.Paths)
         {
+            if (Config.IgnorePaths.Contains(path))
+            {
+                Console.WriteLine($"{path} is set to be ignored. Skipping.");
+                continue;
+            }
+
             Console.Write($"Working on {Path.GetFileName(path)}... ");
 
             if (config.ZipDirs)
@@ -126,7 +147,7 @@ public static class Handlers
             catch (Exception e)
             {
                 Console.WriteLine(Starry.Colour.ColourText("ERR", Colours.Red));
-                Console.WriteLine($"Failed to move {path} with: {e.Message}. Ignoring.");
+                Console.WriteLine($"Failed to copy {path} with: {e.Message}. Ignoring.");
             }
         }
 
@@ -156,7 +177,7 @@ public static class Handlers
                 Console.WriteLine(Starry.Colour.ColourText("OK", Colours.Green));
             }
             catch (Exception e)
-            { 
+            {
                 Console.WriteLine(Starry.Colour.ColourText("ERR", Colours.Red));
                 Console.WriteLine($"Failed to clean up: {e}.");
             }

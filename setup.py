@@ -15,11 +15,12 @@ Description:
     This script is used to install and uninstall Starry.
 
 Usage:
-    (sudo) python setup.py [install|uninstall|help]
+    (sudo) python setup.py [build|install|uninstall|help]
     
-    install - Compiles and moves Starry to your local binary directory.
+    build     - Compiles Starry.
+    install   - Moves Starry to your local binary directory.
     uninstall - Removes Starry from your local binary directory.
-    help - Displays this help message.
+    help      - Displays this help message.
 """
 
 
@@ -47,18 +48,20 @@ def ask_perm(action: str):
 
 
 def main():
-    accepted_args: list[str] = ["install", "uninstall", "help"]
+    accepted_args: list[str] = ["build", "install", "uninstall", "help"]
     if len(sys.argv) <= 1:
-        print("\033[91mERROR:\033[0m Argument not provided. Please specify an argument: [install, uninstall, help]");
+        print("\033[91mERROR:\033[0m Argument not provided. Please specify an argument: [build, install, uninstall, help]");
         exit(1)
     
     if sys.argv[1] not in accepted_args:
-        print("\033[91mERROR:\033[0m Argument doesnt exist. Please specify an existing argument: [install, uninstall, help]");
+        print("\033[91mERROR:\033[0m Argument doesnt exist. Please specify an existing argument: [build, install, uninstall, help]");
         exit(1)
 
     match sys.argv[1]:
-        case "install":
-            ask_perm(input("Starry will be compiled and moved to /usr/local/bin for linux, for this you need to run as sudo. Do you wish to continue? [Y/n] "))
+        case "build":
+            action: str =input("Starry will be compiled. Do you wish to continue? [Y/n] ")
+            if action.lower() != "y" and action.lower() != "yes":
+                exit(1)
 
             print("Compiling Starry... ", end="", flush=True)
 
@@ -76,7 +79,7 @@ def main():
 
                 print(f"Compilation failed with the following error: {e}")
                 exit(1)
-
+        case "install":
             print("Moving Starry to ", end="", flush=True)
             try:
                 system: str = platform.system();
