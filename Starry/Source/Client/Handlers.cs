@@ -1,5 +1,6 @@
 ﻿using Starry.Source.Client.Colour;
 using Starry.Source.Config;
+using Starry.Source.Config.Models;
 using System.IO.Compression;
 
 namespace Starry.Source.Client;

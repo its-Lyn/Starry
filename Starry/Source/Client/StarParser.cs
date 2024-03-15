@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using Starry.Source.Client.Colour;
 using Starry.Source.Config;
+using Starry.Source.Config.Models;
 
 namespace Starry.Source.Client;
 
@@ -13,7 +14,6 @@ public class StarParser
         public string? Output { get; set; }
     }
 
-    // TODO
     [Verb("config", HelpText = "Create and edit the configuration file.")]
     private class ConfigOpts
     {
@@ -43,11 +43,22 @@ public class StarParser
         public bool? ZipParent { get; set; }
     }
 
+    [Verb("history", HelpText = "Manage your history.")]
+    private class HistoryOpts 
+    {
+        [Option('c', "clear", Required = false, HelpText = "Clear out your history.")]
+        public bool HistoryClear { get; set; }
+
+        [Option('l', "list", Required = false, HelpText = "List out your history.")]
+        public bool HistoryList { get; set; }
+    }
+
     public void Parse(string[] args)
     {
         ConfigModel conf = StarConfig.Fetch();
+        HistoryModel hist = StarConfig.History();
 
-        Parser.Default.ParseArguments<BackupOpts, ConfigOpts>(args)
+        Parser.Default.ParseArguments<BackupOpts, ConfigOpts, HistoryOpts>(args)
             .WithParsed<BackupOpts>(backup =>
             {
                 // There are three possible ways to fetch the out path
@@ -236,6 +247,16 @@ public class StarParser
                     }
 
                     StarConfig.Update(conf);
+                }
+            })
+            .WithParsed<HistoryOpts>(history =>
+            {
+                if (history.HistoryClear)
+                {
+                    hist.History.Clear();
+                    StarConfig.Update(hist);
+
+                    return;
                 }
             });
     }

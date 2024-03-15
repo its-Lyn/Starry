@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Starry.Source.Config;
+namespace Starry.Source.Config.Models;
 
 public class ConfigModel
 {
