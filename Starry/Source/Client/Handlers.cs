@@ -68,6 +68,31 @@ public static class Handlers
                 else if (File.Exists(output))
                     File.Delete(output);
             }
+            else
+            {
+                return;
+            }
+        }
+
+        // Also check for existing backup ZIP file.
+        if (config.ZipParent)
+        {
+            string zipOutput = $"{output}.zip";
+            if (File.Exists(zipOutput))
+            {
+                Console.Write($"Compressed {output} already exists. Do you wish to overwrite it? [Y/n] ");
+                string actionZip = Console.ReadLine()!;
+                actionZip = actionZip.Trim().ToLower();
+
+                if (actionZip == "y" || actionZip == "yes" || string.IsNullOrEmpty(actionZip))
+                {
+                    File.Delete(zipOutput);
+                }
+                else
+                {
+                    return;
+                }
+            }
         }
 
         // Keep track of how long it took to back up.
@@ -108,7 +133,7 @@ public static class Handlers
                 continue;
             }
 
-            Console.Write($"Working on {Path.GetFileName(path)}... ");
+            Console.Write($"Working on {Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar))}... ");
 
             // Compress child directories.
             if (config.ZipDirs)
@@ -166,7 +191,7 @@ public static class Handlers
             }
 
             // If everything was successful, store the name in history.
-            dirNames.Add(Path.GetFileName(path));
+            dirNames.Add(Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar)));
         }
 
         // Zip up the backup directory and then delete the uncompressed, old directory.
@@ -202,13 +227,14 @@ public static class Handlers
             }
         }
 
+        // End off stopwatch here, as history should be taken into account.
         DateTime finish = DateTime.Now;
 
         // Update history
         Item historyObject = new Item
         {
             Backed = dirNames,
-            Date = finish.ToString("dd/MM/yyyy HH:mm"),
+            Date = finish.ToString("dd/MM/yyyy, HH:mm"),
         };
 
         HistoryModel history = StarConfig.History();
@@ -218,6 +244,6 @@ public static class Handlers
 
         // Calculate total time
         TimeSpan elapsed = finish - start;
-        Console.WriteLine($"Done! Finished backing up in: {elapsed.Hours:00}:{elapsed.Minutes:00}:{elapsed.Seconds:00}.{elapsed.Milliseconds:00}");
+        Console.WriteLine($"\nDone! Finished backing up in {elapsed.Hours:00}:{elapsed.Minutes:00}:{elapsed.Seconds:00}.{elapsed.Milliseconds:00}");
     }
 }

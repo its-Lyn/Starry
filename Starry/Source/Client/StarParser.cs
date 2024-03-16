@@ -137,10 +137,10 @@ public class StarParser
 
                     int ignoreCount = 0;
 
-                    Console.WriteLine($"{Starry.Colour.ColourText("Ignore folders:", Colours.Cyan)}");
+                    Console.WriteLine($"{Starry.Colour.ColourText("Ignore files:", Colours.Cyan)}");
                     if (conf.IgnorePaths.Count() == 0)
                     {
-                        Console.WriteLine(Starry.Colour.ColourText("    No Ignored Folders added yet! Horray!\n", Colours.Green));
+                        Console.WriteLine(Starry.Colour.ColourText("    No Ignored files added yet! Horray!\n", Colours.Green));
                     }
                     else
                     {
@@ -271,6 +271,26 @@ public class StarParser
                     }
 
                     Console.WriteLine(Starry.Colour.ColourText("Starry backup history!\n", Colours.Magenta));
+
+                    foreach (Item item in hist.History) 
+                    {
+                        Console.WriteLine(
+                            Starry.Colour.ColourText($"{item.Date}", Colours.Magenta)
+                        );
+
+                        Console.Write("    You backed up ");
+                        for (int index = 0; index < item.Backed.Count; index++)
+                        {
+                            string backup = item.Backed[index].TrimEnd(Path.DirectorySeparatorChar);
+                            if (index == item.Backed.Count - 1)
+                            {
+                                Console.WriteLine($"and {Starry.Colour.ColourText($"\"{backup}\"", Colours.Green)}.\n");
+                                break;
+                            }
+
+                            Console.Write($"{Starry.Colour.ColourText($"\"{backup}\"", Colours.Green)} ");
+                        }
+                    }
 
                     return;
                 }

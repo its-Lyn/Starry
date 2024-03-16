@@ -4,7 +4,7 @@ namespace Starry.Source.Config.Models;
 
 public class Item
 {
-    [JsonPropertyName("folders")]
+    [JsonPropertyName("files")]
     public required List<string> Backed { get; set; }
 
     [JsonPropertyName("date")]

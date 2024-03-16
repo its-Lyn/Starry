@@ -44,4 +44,3 @@ Copyright (C) 2024 Evelyn Serra
 ```
 
 A few quirks are that when running `--remove-path` you can do `--remove-path all` and all the backup paths will be removed, while the same stands true for it's `--remove-ignore` counterpart. For `--default-output` you can do `--default-output reset` and its value will be reset back to `null`
-

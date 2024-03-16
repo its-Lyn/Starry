@@ -68,10 +68,33 @@ Move-Item .\Starry C:\Windows\system32
 starry help
 ```
 
+## Uninstalling
+Uninstalling Starry is as easy as running two commands!
+```bash
+# Using setup.py
+sudo python setup.py uninstall
+
+# You mustn't use sudo for this command if you're on linux.
+python setup.py rconf
+```
+But you can always just do it manually.
+```bash
+sudo rm /usr/local/bin/starry
+
+# Removing the configuration.
+
+# If you have set XDG_CONFIG_HOME 
+rm -rf -I $XDG_CONFIG_HOME/Starry
+# Else
+rm -rf -I ~/.config/Starry
+```
+
 ## Usage
 !["Starry being used."](./Documentation/Assets/image.png)
 
 Starry has a small config system. If you'd like to learn more, please take a look at the [documentation](./Documentation/Config.md)
+
+Starry also keeps track of your previous backups! You can see how it works [here](./Documentation/History.md)!
 
 ## License
 MIT

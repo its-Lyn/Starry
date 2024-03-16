@@ -19,7 +19,7 @@ public static class StarConfig
             return fullPath;
         }
 
-        string configPath = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), ".config", "Starry");
+        string configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "Starry");
         Directory.CreateDirectory(configPath);
 
         return configPath;
