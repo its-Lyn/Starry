@@ -258,6 +258,22 @@ public class StarParser
 
                     return;
                 }
+
+                if (history.HistoryList)
+                {
+                    if (hist.History.Count == 0)
+                    {
+                        Console.WriteLine(
+                            Starry.Colour.ColourText("No history found yet. Better start backing up!", Colours.Magenta)
+                        );
+
+                        return;
+                    }
+
+                    Console.WriteLine(Starry.Colour.ColourText("Starry backup history!\n", Colours.Magenta));
+
+                    return;
+                }
             });
     }
 }

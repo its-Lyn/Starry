@@ -8,7 +8,7 @@ public class Item
     public required List<string> Backed { get; set; }
 
     [JsonPropertyName("date")]
-    public DateTime Date { get; set; }
+    public required string Date { get; set; }
 }
 
 public class HistoryModel

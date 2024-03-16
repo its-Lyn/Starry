@@ -35,6 +35,7 @@ public static class Handlers
         string dest = Path.Combine(output, dir.Name);
         Directory.CreateDirectory(dest);
 
+        // Copy over the files.
         foreach (FileInfo file in files)
         {
             if (Config.IgnorePaths.Contains(file.FullName))
@@ -45,12 +46,15 @@ public static class Handlers
             file.CopyTo(Path.Combine(dest, file.Name));
         }
 
+        // Copy over the subdirectories using recursion.
+        // This one is kinda messy.
         foreach (DirectoryInfo subDir in dirs)
             CopyDir(subDir.FullName, dest);
     }
 
     public static void CreateBackups(ConfigModel config, string output)
     {
+        // Safety check for existing backup directory.
         if (File.Exists(output) || Directory.Exists(output))
         {
             Console.Write($"The path {output} already exists. Do you wish to overwrite it? [Y/n] ");
@@ -66,6 +70,9 @@ public static class Handlers
             }
         }
 
+        // Keep track of how long it took to back up.
+        DateTime start = DateTime.Now;
+
         Console.Write("Checking file paths... ");
         if (config.Paths.Count == 0)
         {
@@ -77,6 +84,7 @@ public static class Handlers
 
         Console.WriteLine(Starry.Colour.ColourText("OK", Colours.Green));
 
+        // Starry should only allow backup if the output path is a directory.
         Console.Write("Creating parent directory... ");
         if (Path.HasExtension(output))
         {
@@ -87,8 +95,10 @@ public static class Handlers
         }
 
         Directory.CreateDirectory(output);
-
         Console.WriteLine(Starry.Colour.ColourText("OK", Colours.Green));
+
+        // Initialise directory names for history.
+        List<string> dirNames = new List<string>();
 
         foreach (string path in config.Paths)
         {
@@ -100,10 +110,12 @@ public static class Handlers
 
             Console.Write($"Working on {Path.GetFileName(path)}... ");
 
+            // Compress child directories.
             if (config.ZipDirs)
             {
                 try
                 {
+                    // Only compress directories, as files do not need to be compressed.
                     if (File.Exists(path))
                     {
                         File.Copy(path, Path.Combine(output, Path.GetFileName(path)));
@@ -128,9 +140,11 @@ public static class Handlers
                     Console.WriteLine($"Failed to compress {path} with: {e.Message}. Ignoring.");
                 }
 
+                dirNames.Add(Path.GetFileName(path));
                 continue;
             }
 
+            // Copy over the files to backup without compressing.
             try
             {
                 if (File.Exists(path))
@@ -150,8 +164,12 @@ public static class Handlers
                 Console.WriteLine(Starry.Colour.ColourText("ERR", Colours.Red));
                 Console.WriteLine($"Failed to copy {path} with: {e.Message}. Ignoring.");
             }
+
+            // If everything was successful, store the name in history.
+            dirNames.Add(Path.GetFileName(path));
         }
 
+        // Zip up the backup directory and then delete the uncompressed, old directory.
         if (config.ZipParent)
         {
             Console.Write($"Compressing {output}... ");
@@ -183,5 +201,23 @@ public static class Handlers
                 Console.WriteLine($"Failed to clean up: {e}.");
             }
         }
+
+        DateTime finish = DateTime.Now;
+
+        // Update history
+        Item historyObject = new Item
+        {
+            Backed = dirNames,
+            Date = finish.ToString("dd/MM/yyyy HH:mm"),
+        };
+
+        HistoryModel history = StarConfig.History();
+        history.History.Add(historyObject);
+
+        StarConfig.Update(history);
+
+        // Calculate total time
+        TimeSpan elapsed = finish - start;
+        Console.WriteLine($"Done! Finished backing up in: {elapsed.Hours:00}:{elapsed.Minutes:00}:{elapsed.Seconds:00}.{elapsed.Milliseconds:00}");
     }
 }
