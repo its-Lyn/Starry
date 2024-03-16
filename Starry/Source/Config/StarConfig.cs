@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Starry.Source.Config.Models;
 
 namespace Starry.Source.Config;
 
@@ -18,22 +19,25 @@ public static class StarConfig
             return fullPath;
         }
 
-        string configPath = Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), ".config", "Starry");
+        string configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "Starry");
         Directory.CreateDirectory(configPath);
 
         return configPath;
     }
 
+    private static string ConfigFile { get; } = Path.Combine(ConfigDir, "config.json");
+    private static string HistoryFile { get; } = Path.Combine(ConfigDir, "history.json");
+
     public static void Update(ConfigModel config)
-    {
-        string configString = JsonSerializer.Serialize<ConfigModel>(config);
-        File.WriteAllText(Path.Combine(ConfigDir, "config.json"), configString);
-    }
+        => File.WriteAllText(ConfigFile, JsonSerializer.Serialize(config));
+
+    public static void Update(HistoryModel history)
+        => File.WriteAllText(HistoryFile, JsonSerializer.Serialize(history));
 
     public static void EnsureExists()
     {
-        string configPath = Path.Combine(ConfigDir, "config.json");
-        if (!File.Exists(configPath))
+        // Checking for the main configuration file.
+        if (!File.Exists(ConfigFile))
         {
             ConfigModel defaultConfig = new ConfigModel
             {
@@ -43,13 +47,27 @@ public static class StarConfig
                 ZipDirs = false,
                 ZipParent = true,
             };
+        
+            File.WriteAllText(ConfigFile, JsonSerializer.Serialize(defaultConfig));
+        }
 
-            string configString = JsonSerializer.Serialize<ConfigModel>(defaultConfig);
-            File.WriteAllText(configPath, configString);
+        // Checking for the history file.
+        if (!File.Exists(HistoryFile))
+        {
+            HistoryModel history = new HistoryModel
+            {
+                History = new List<Item>()
+            };
+
+            File.WriteAllText(HistoryFile, JsonSerializer.Serialize(history));
         }
     }
 
     public static ConfigModel Fetch()
-        => JsonSerializer.Deserialize<ConfigModel>(File.ReadAllText(Path.Combine(ConfigDir, "config.json")))
+        => JsonSerializer.Deserialize<ConfigModel>(File.ReadAllText(ConfigFile))
                ?? throw new NullReferenceException("Config file could not be found, what did you do?");
+
+    public static HistoryModel History()
+        => JsonSerializer.Deserialize<HistoryModel>(File.ReadAllText(HistoryFile))
+             ?? throw new NullReferenceException("History file could not be found, what did you do?");
 }

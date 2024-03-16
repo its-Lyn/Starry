@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import platform
 import sys
+from pathlib import Path
 
 
 help_str: str = """
@@ -15,11 +16,12 @@ Description:
     This script is used to install and uninstall Starry.
 
 Usage:
-    (sudo) python setup.py [build|install|uninstall|help]
+    (sudo) python setup.py [build|install|uninstall|rconf|help]
     
     build     - Compiles Starry.
     install   - Moves Starry to your local binary directory.
     uninstall - Removes Starry from your local binary directory.
+    rconf     - Revomes Starry's configuration folder.
     help      - Displays this help message.
 """
 
@@ -48,13 +50,13 @@ def ask_perm(action: str):
 
 
 def main():
-    accepted_args: list[str] = ["build", "install", "uninstall", "help"]
+    accepted_args: list[str] = ["build", "install", "uninstall", "help", "rconf"]
     if len(sys.argv) <= 1:
-        print("\033[91mERROR:\033[0m Argument not provided. Please specify an argument: [build, install, uninstall, help]");
+        print("\033[91mERROR:\033[0m Argument not provided. Please specify an argument: [build, install, uninstall, rconf, help]");
         exit(1)
     
     if sys.argv[1] not in accepted_args:
-        print("\033[91mERROR:\033[0m Argument doesnt exist. Please specify an existing argument: [build, install, uninstall, help]");
+        print("\033[91mERROR:\033[0m Argument doesnt exist. Please specify an existing argument: [build, install, uninstall, rconf, help]");
         exit(1)
 
     match sys.argv[1]:
@@ -120,7 +122,7 @@ def main():
 
             print_ok()
         case "uninstall":
-            ask_perm(input("Starry will be deleted from binary path, for this you need to run as sudo. Do you wish to continue? [Y/n] "))
+            ask_perm(input("Starry will be deleted from binary path, as well as it's config, for this you need to run as sudo. Do you wish to continue? [Y/n] "))
 
             print("Removing Starry from binary path... ", end="", flush=True)
 
@@ -133,6 +135,26 @@ def main():
                     return
 
                 os.remove("/usr/local/bin/starry")
+
+                print_ok()
+            except Exception as e:
+                print_err()
+
+                print(f"Removing failed with the following error: {e}")
+                exit(1)
+        case "rconf":
+            print("Removing Starry config... ", end="", flush=True)
+            try:
+                star_path: str = "";
+
+                xdg_conf: str = os.getenv("XDG_CONFIG_HOME", "NOT_SET")
+                if xdg_conf != "NOT_SET":
+                    star_path = os.path.join(xdg_conf, "Starry")
+                else:
+                    home_path: str = Path.home();
+                    star_path = os.path.join(home_path, ".config", "Starry")
+
+                shutil.rmtree(star_path)
 
                 print_ok()
             except Exception as e:

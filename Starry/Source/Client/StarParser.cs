@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using Starry.Source.Client.Colour;
 using Starry.Source.Config;
+using Starry.Source.Config.Models;
 
 namespace Starry.Source.Client;
 
@@ -13,7 +14,6 @@ public class StarParser
         public string? Output { get; set; }
     }
 
-    // TODO
     [Verb("config", HelpText = "Create and edit the configuration file.")]
     private class ConfigOpts
     {
@@ -43,11 +43,22 @@ public class StarParser
         public bool? ZipParent { get; set; }
     }
 
+    [Verb("history", HelpText = "Manage your history.")]
+    private class HistoryOpts 
+    {
+        [Option('c', "clear", Required = false, HelpText = "Clear out your history.")]
+        public bool HistoryClear { get; set; }
+
+        [Option('l', "list", Required = false, HelpText = "List out your history.")]
+        public bool HistoryList { get; set; }
+    }
+
     public void Parse(string[] args)
     {
         ConfigModel conf = StarConfig.Fetch();
+        HistoryModel hist = StarConfig.History();
 
-        Parser.Default.ParseArguments<BackupOpts, ConfigOpts>(args)
+        Parser.Default.ParseArguments<BackupOpts, ConfigOpts, HistoryOpts>(args)
             .WithParsed<BackupOpts>(backup =>
             {
                 // There are three possible ways to fetch the out path
@@ -126,10 +137,10 @@ public class StarParser
 
                     int ignoreCount = 0;
 
-                    Console.WriteLine($"{Starry.Colour.ColourText("Ignore folders:", Colours.Cyan)}");
+                    Console.WriteLine($"{Starry.Colour.ColourText("Ignore files:", Colours.Cyan)}");
                     if (conf.IgnorePaths.Count() == 0)
                     {
-                        Console.WriteLine(Starry.Colour.ColourText("    No Ignored Folders added yet! Horray!\n", Colours.Green));
+                        Console.WriteLine(Starry.Colour.ColourText("    No Ignored files added yet! Horray!\n", Colours.Green));
                     }
                     else
                     {
@@ -236,6 +247,52 @@ public class StarParser
                     }
 
                     StarConfig.Update(conf);
+                }
+            })
+            .WithParsed<HistoryOpts>(history =>
+            {
+                if (history.HistoryClear)
+                {
+                    hist.History.Clear();
+                    StarConfig.Update(hist);
+
+                    return;
+                }
+
+                if (history.HistoryList)
+                {
+                    if (hist.History.Count == 0)
+                    {
+                        Console.WriteLine(
+                            Starry.Colour.ColourText("No history found yet. Better start backing up!", Colours.Magenta)
+                        );
+
+                        return;
+                    }
+
+                    Console.WriteLine(Starry.Colour.ColourText("Starry backup history!\n", Colours.Magenta));
+
+                    foreach (Item item in hist.History) 
+                    {
+                        Console.WriteLine(
+                            Starry.Colour.ColourText($"{item.Date}", Colours.Magenta)
+                        );
+
+                        Console.Write("    You backed up ");
+                        for (int index = 0; index < item.Backed.Count; index++)
+                        {
+                            string backup = item.Backed[index].TrimEnd(Path.DirectorySeparatorChar);
+                            if (index == item.Backed.Count - 1)
+                            {
+                                Console.WriteLine($"and {Starry.Colour.ColourText($"\"{backup}\"", Colours.Green)}.\n");
+                                break;
+                            }
+
+                            Console.Write($"{Starry.Colour.ColourText($"\"{backup}\"", Colours.Green)} ");
+                        }
+                    }
+
+                    return;
                 }
             });
     }
